@@ -91,6 +91,7 @@ public class StockHolding extends AbstractEntity {
      */
     private void buyShares(int numberOfShares) throws StockLookupException {
 
+        this.symbol = symbol.toUpperCase();
         if (numberOfShares < 0) {
             throw new IllegalArgumentException("Can not purchase a negative number of shares.");
         }
@@ -111,6 +112,7 @@ public class StockHolding extends AbstractEntity {
      */
     private void sellShares(int numberOfShares) throws StockLookupException {
 
+        this.symbol = symbol.toUpperCase();
         if (numberOfShares > sharesOwned) {
             throw new IllegalArgumentException("Number to sell exceeds shares owned for stock" + symbol);
         }

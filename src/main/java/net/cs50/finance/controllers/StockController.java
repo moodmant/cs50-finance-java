@@ -30,14 +30,15 @@ public class StockController extends AbstractFinanceController {
     }
 
     @RequestMapping(value = "/quote", method = RequestMethod.POST)
-    public String quote(String symbol, Model model) {
+    public String quote(String symbol, Model model) throws StockLookupException {
 
-        // TODO - Implement quote lookup
-        Stock myStock = null;
+        //- Implement quote lookup
+        Stock myStock;
         try {
             myStock = Stock.lookupStock(symbol);
         } catch (StockLookupException e) {
-            //this.displayError(
+            e.printStackTrace();
+            throw new StockLookupException("error: ", symbol);
         }
 
         model.addAttribute("stock_desc", myStock.getName());

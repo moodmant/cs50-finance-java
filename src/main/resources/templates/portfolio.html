@@ -12,6 +12,22 @@
 
         <!-- TODO - Display portfolio -->
         <p>Portfolio!</p>
+        <table class="table table.striped">
+            <tr>
+                <th>Stock symbol</th>
+                <th>Name</th>
+                <th>Shares</th>
+                <th>Current price</th>
+                <th>Total value</th>
+            </tr>
+            <tr th:each="holding : ${holdings}">
+                <td th:text="${holding.key}">Symbol</td>
+                <td th:text="${holding.value.name}">Shares</td>
+                <td th:text="${holding.value.totalValue}">Value</td>
+                <td th:text="'$' + ${holding.value.price}">Price</td>
+                <td th:text="'$' + ${holding.value.totalValue}">Value</td>
+            </tr>
+        </table>
 
     </div>
 

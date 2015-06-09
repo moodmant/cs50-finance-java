@@ -1,10 +1,5 @@
 package net.cs50.finance.models;
 
-import net.cs50.finance.models.dao.StockHoldingDao;
-import net.cs50.finance.models.dao.StockTransactionDao;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Bean;
-
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
@@ -118,7 +113,7 @@ public class StockHolding extends AbstractEntity {
         }
 
         setSharesOwned(sharesOwned - numberOfShares);
-        // TODO - update user cash on sale
+        //- update user cash on sale
 
         StockTransaction transaction = new StockTransaction(this, numberOfShares, StockTransaction.TransactionType.SELL);
         this.transactions.add(transaction);
@@ -139,7 +134,16 @@ public class StockHolding extends AbstractEntity {
         //- make sure symbol matches case convention
         symbol = symbol.toUpperCase();
 
-        // Get existing holding
+        Stock myStock;
+        myStock = Stock.lookupStock(symbol);
+        float buyPrice = myStock.getPrice() * numberOfShares;
+
+        if (user.getCash() < buyPrice) {
+            throw new StockLookupException();
+
+        }
+
+            // Get existing holding
         Map<String, StockHolding> userPortfolio = user.getPortfolio();
         StockHolding holding;
 
@@ -152,6 +156,9 @@ public class StockHolding extends AbstractEntity {
         // Conduct buy
         holding = userPortfolio.get(symbol);
         holding.buyShares(numberOfShares);
+
+        // update cash
+        user.setCash(user.getCash() - buyPrice);
 
         return holding;
     }
@@ -167,7 +174,12 @@ public class StockHolding extends AbstractEntity {
      */
     public static StockHolding sellShares(User user, String symbol, int numberOfShares) throws StockLookupException {
 
-        // TODO - make sure symbol matches case convention
+        // - make sure symbol matches case convention
+        symbol = symbol.toUpperCase();
+        Stock myStock;
+        myStock = Stock.lookupStock(symbol);
+        float salePrice = myStock.getPrice() * numberOfShares;
+
 
         // Get existing holding
         Map<String, StockHolding> userPortfolio = user.getPortfolio();
@@ -181,6 +193,8 @@ public class StockHolding extends AbstractEntity {
         holding = userPortfolio.get(symbol);
         holding.sellShares(numberOfShares);
 
+        // Update cash
+        user.setCash(user.getCash() + salePrice);
         return holding;
     }
 }

@@ -1,6 +1,7 @@
 package net.cs50.finance.controllers;
 
 import net.cs50.finance.models.Stock;
+import net.cs50.finance.models.StockHolding;
 import net.cs50.finance.models.StockLookupException;
 import net.cs50.finance.models.dao.StockHoldingDao;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,16 +39,14 @@ public class StockController extends AbstractFinanceController {
             myStock = Stock.lookupStock(symbol);
         } catch (StockLookupException e) {
             e.printStackTrace();
-            throw new StockLookupException("error: ", symbol);
+            return displayError("Unable to lookup stock", model);
         }
-
-        model.addAttribute("stock_desc", myStock.getName());
-        model.addAttribute("stock_price", myStock.getPrice());
-
 
         // pass data to template
         model.addAttribute("title", "Quote");
         model.addAttribute("quoteNavClass", "active");
+        model.addAttribute("stock_desc", myStock.getName());
+        model.addAttribute("stock_price", myStock.getPrice());
 
         return "quote_display";
     }
@@ -64,7 +63,16 @@ public class StockController extends AbstractFinanceController {
     @RequestMapping(value = "/buy", method = RequestMethod.POST)
     public String buy(String symbol, int numberOfShares, HttpServletRequest request, Model model) {
 
-        // TODO - Implement buy action
+        //- Implement buy action
+        StockHolding holding = null;
+        try {
+            holding = StockHolding.buyShares(getUserFromSession(request), symbol, numberOfShares);
+        } catch (StockLookupException a){
+            a.printStackTrace();
+            return displayError("Need more money for that!", model);
+        }
+
+        stockHoldingDao.save(holding);
 
         model.addAttribute("title", "Buy");
         model.addAttribute("action", "/buy");
@@ -84,7 +92,16 @@ public class StockController extends AbstractFinanceController {
     @RequestMapping(value = "/sell", method = RequestMethod.POST)
     public String sell(String symbol, int numberOfShares, HttpServletRequest request, Model model) {
 
-        // TODO - Implement sell action
+        //- Implement sell action
+        StockHolding holding = null;
+        try {
+            holding = StockHolding.sellShares(getUserFromSession(request), symbol, numberOfShares);
+        } catch (StockLookupException b){
+            b.printStackTrace();
+        }
+
+        stockHoldingDao.save(holding);
+
 
         model.addAttribute("title", "Sell");
         model.addAttribute("action", "/sell");
